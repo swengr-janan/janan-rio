@@ -494,37 +494,77 @@ function initNav() {
     isOpen ? closeNav() : openNav();
   });
 
-  $$('a[href^="#"]', nav).forEach((a) => a.addEventListener("click", () => closeNav()));
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeNav(); });
+  // Scrollspy: highlight nav item for the section that contains a point near the top of the viewport
+  const links = $$("[data-navlink]", nav);
+  const ACTIVE_OFFSET = 120; // px from top of viewport; section containing this line is "active"
 
-  // Scrollspy: highlight current section (no default "pre-selected" link on load)
-  const links = $$("[data-navlink]");
-  const sections = links.map((a) => $(a.getAttribute("href"))).filter(Boolean);
-  const byId = new Map(links.map((a) => [a.getAttribute("href"), a]));
+  function getHash(a) {
+    const h = (a.getAttribute("href") || "").trim();
+    const id = h.split("#")[1];
+    return id ? "#" + id : "";
+  }
+
+  const byId = new Map(links.map((a) => [getHash(a), a]));
+  const sections = links.map((a) => ({ id: getHash(a), el: $(getHash(a)) })).filter((s) => s.el);
 
   function setActive(id) {
     links.forEach((a) => {
-      const active = a.getAttribute("href") === id;
+      const active = getHash(a) === id;
       a.classList.toggle("is-active", active);
       if (active) a.setAttribute("aria-current", "page");
       else a.removeAttribute("aria-current");
     });
   }
 
-  const io = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter((e) => e.isIntersecting)
-        .sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0))[0];
+  function getActiveSectionId() {
+    const y = window.scrollY + ACTIVE_OFFSET;
+    let best = null;
+    for (const { id, el } of sections) {
+      const rect = el.getBoundingClientRect();
+      const top = rect.top + window.scrollY;
+      const bottom = top + rect.height;
+      if (y >= top && y < bottom) return id;
+      if (top <= y) best = id;
+    }
+    return best || (sections[0] && sections[0].id) || null;
+  }
 
-      if (!visible) return;
-      const id = "#" + visible.target.id;
-      if (byId.has(id)) setActive(id);
-    },
-    { root: null, threshold: [0.25, 0.5, 0.75], rootMargin: "-30% 0px -55% 0px" }
-  );
+  function updateActiveFromScroll() {
+    const id = getActiveSectionId();
+    if (id && byId.has(id)) setActive(id);
+  }
 
-  sections.forEach((s) => io.observe(s));
+  let navigatedToId = null;
+
+  $$('a[href^="#"]', nav).forEach((a) => {
+    a.addEventListener("click", () => {
+      const id = getHash(a);
+      if (id && byId.has(id)) {
+        navigatedToId = id;
+        setActive(id);
+      }
+      closeNav();
+    });
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeNav(); });
+
+  let scrollTicking = false;
+  window.addEventListener("scroll", () => {
+    if (scrollTicking) return;
+    scrollTicking = true;
+    requestAnimationFrame(() => {
+      scrollTicking = false;
+      const id = getActiveSectionId();
+      if (!id || !byId.has(id)) return;
+      if (navigatedToId !== null) {
+        if (id === navigatedToId) navigatedToId = null;
+        else return;
+      }
+      setActive(id);
+    });
+  }, { passive: true });
+
+  updateActiveFromScroll();
 }
 
 function initCopyAddress() {
