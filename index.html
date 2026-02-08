@@ -14,8 +14,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="light" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
   <title>Wedding Website</title>
 
   <!-- Google Fonts (edit in styles.css if you change font families) -->
@@ -32,7 +32,7 @@
   <header class="site-header" id="siteHeader">
     <div class="container header-inner">
       <a class="brand" href="#top" id="brandLink">
-        <img src="assets/logo.png" alt="" class="brand-logo" id="brandLogo" width="120" height="40">
+        <span class="brand-text" id="brandLogo">J &amp; R</span>
       </a>
 
       <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="siteNav">
@@ -51,6 +51,11 @@
           <li><a href="#faq" data-navlink>FAQ</a></li>
         </ul>
       </nav>
+
+      <button type="button" class="theme-toggle" id="themeToggle" role="switch" aria-checked="false" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <span class="theme-toggle-icon theme-toggle-sun" aria-hidden="true"></span>
+        <span class="theme-toggle-icon theme-toggle-moon" aria-hidden="true"></span>
+      </button>
     </div>
   </header>
 
@@ -287,7 +292,7 @@
           <p class="section-subtitle">Your presence is the best gift. If you would like, you can help us build our next chapter.</p>
         </header>
 
-        <div class="card-grid" id="registryGrid" aria-label="Registry links"></div>
+        <div class="card-grid" id="registryGrid" aria-label="Registry"></div>
       </div>
     </section>
 

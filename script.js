@@ -12,6 +12,8 @@
 
 const FORM_ENDPOINT = ""; // Example: "https://formspree.io/f/yourId" (leave blank to disable POST)
 
+const THEME_STORAGE_KEY = "wedding-theme"; // "light" | "dark"
+
 /** Single source of truth for editable content */
 const CONFIG = {
   coupleNames: "John Anthony & Rioanne",
@@ -71,27 +73,22 @@ const CONFIG = {
     {
       name: "Home essentials",
       url: "https://example.com/registry-home",
-      description: "A simple list of items we will use every day.",
-      note: "Ships internationally"
+      description: "Items we’ll use every day as we build our home together—from kitchen basics to things that make a house feel like ours.",
+      note: "View our list and ship to our address"
     },
     {
-      name: "Honeymoon fund",
-      url: "https://example.com/registry-honeymoon",
-      description: "Contribute to experiences we will remember forever.",
-      note: "Any amount helps"
-    },
-    {
-      name: "Charity",
-      url: "https://example.com/registry-charity",
-      description: "Support a cause that matters to us.",
-      note: "Optional"
+      name: "Monetary gift",
+      url: "https://example.com/registry-monetary",
+      description: "A contribution toward our future—helping us build our family and our home. Any amount is deeply appreciated.",
+      note: "Secure and optional"
     }
   ],
 
   storyItems: [
-    { kicker: "First hello", title: "A quick conversation that became a habit", text: "We met, we talked, and somehow it kept going." },
-    { kicker: "The trip", title: "A weekend away that felt like home", text: "We learned we travel well together, even when plans change." },
-    { kicker: "The question", title: "A quiet moment and an easy yes", text: "No big crowd, just us, and a feeling we recognized." }
+    { kicker: "The beginning", title: "John courted Rioanne for 3 months", text: "Three months of courting led to something special." },
+    { kicker: "April 10, 2022", title: "We became official", text: "Rioanne said yes—we were officially together from that day on." },
+    { kicker: "June 29, 2025", title: "John proposed at Hong Kong Disneyland", text: "John popped the question at Hong Kong Disneyland. A magical yes." },
+    { kicker: "Our family", title: "Meet Pluto", text: "We have a child dog named Pluto who is so cute." }
   ],
 
   gallery: {
@@ -121,14 +118,14 @@ const CONFIG = {
     "If you need to update your RSVP, submit again and include the same name and email."
   ],
 
-  contactEmail: "hello@example.com",
+  contactEmail: "jananriowedding@gmail.com",
   socials: [
-    { label: "Instagram", url: "https://example.com" },
-    { label: "Updates", url: "https://example.com" }
+    { label: "Instagram", url: "#" },
+    { label: "Updates", url: "#" }
   ],
 
   disclaimer:
-    "This site stores RSVP submissions in your browser unless you connect an external form endpoint."
+    ""
 };
 
 /* -----------------------------
@@ -217,7 +214,7 @@ function safeSetAttr(selector, attr, value) {
 function applyConfigToStatic() {
   try {
     const brandLogo = $("#brandLogo");
-    if (brandLogo) brandLogo.alt = CONFIG.coupleNames;
+    if (brandLogo) brandLogo.textContent = initialsPairFromNames(CONFIG.coupleNames);
 
     safeSetText("#footerNames", CONFIG.coupleNames);
     safeSetText("#footerNamesInline", CONFIG.coupleNames);
@@ -364,20 +361,13 @@ function renderRegistry() {
   const grid = $("#registryGrid");
   grid.innerHTML = "";
   CONFIG.registryLinks.forEach((r) => {
-    const a = document.createElement("a");
-    a.className = "registry-card";
-    a.href = r.url;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    a.innerHTML = `
+    const card = document.createElement("div");
+    card.className = "registry-card";
+    card.innerHTML = `
       <h3 class="registry-title">${escapeHtml(r.name)}</h3>
       <p class="registry-desc">${escapeHtml(r.description)}</p>
-      <div class="registry-meta">
-        <span>${escapeHtml(r.note ?? "")}</span>
-        <span aria-hidden="true">↗</span>
-      </div>
     `;
-    grid.appendChild(a);
+    grid.appendChild(card);
   });
 }
 
@@ -455,6 +445,40 @@ function renderGallery() {
 /* -----------------------------
    Interactions
 ------------------------------ */
+function getPreferredTheme() {
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored === "light" || stored === "dark") return stored;
+    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
+  } catch (_) {}
+  return "light";
+}
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  root.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch (_) {}
+  const toggle = $("#themeToggle");
+  if (toggle) {
+    toggle.setAttribute("aria-checked", theme === "dark" ? "true" : "false");
+    toggle.setAttribute("title", theme === "dark" ? "Switch to light mode" : "Switch to dark mode");
+  }
+}
+
+function initTheme() {
+  const theme = getPreferredTheme();
+  applyTheme(theme);
+  const toggle = $("#themeToggle");
+  if (toggle) {
+    toggle.addEventListener("click", () => {
+      const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      applyTheme(next);
+    });
+  }
+}
+
 function initNav() {
   const toggle = $("#navToggle");
   const nav = $("#siteNav");
@@ -1097,6 +1121,7 @@ function init() {
     renderStory();
     renderGallery();
 
+    initTheme();
     initNav();
     initHeroVideo();
     initCopyAddress();
