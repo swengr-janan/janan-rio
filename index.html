@@ -305,15 +305,11 @@
           <p class="section-subtitle">Please reply by <span id="rsvpDeadlineText">June 1, 2026</span>.</p>
         </header>
 
-        <div class="grid-2">
-          <article class="card">
-            <h3 class="card-title">Your response</h3>
+        <article class="card">
+          <h3 class="card-title">Your response</h3>
+          <p class="muted small" style="margin-bottom: var(--space-5);">Please RSVP by the deadline so we can finalize seating and meals.</p>
 
-            <div class="notice" id="rsvpNotice" role="status" aria-live="polite">
-              RSVPs are stored in your browser (localStorage). You can export them as CSV anytime.
-            </div>
-
-            <form id="rsvpForm" class="form" novalidate>
+          <form id="rsvpForm" class="form" novalidate>
               <div class="field">
                 <label for="fullName">Full name <span class="req" aria-hidden="true">*</span></label>
                 <input id="fullName" name="fullName" type="text" autocomplete="name" required />
@@ -356,28 +352,14 @@
               <div class="field" id="childPolicyField"></div>
 
               <div class="field">
-                <label for="dietary">Dietary restrictions (optional)</label>
-                <input id="dietary" name="dietary" type="text" autocomplete="off" />
-              </div>
-
-              <div class="field">
                 <label for="message">Message to the couple (optional)</label>
                 <textarea id="message" name="message" rows="3"></textarea>
-              </div>
-
-              <div class="field">
-                <label for="song">Song request (optional)</label>
-                <input id="song" name="song" type="text" autocomplete="off" />
               </div>
 
               <div class="form-actions">
                 <button class="btn btn-primary" type="submit" id="submitBtn">Submit RSVP</button>
                 <button class="btn btn-secondary" type="button" id="exportRsvpsBtn">Export RSVPs (CSV)</button>
               </div>
-
-              <p class="muted small">
-                Optional: Set <code>FORM_ENDPOINT</code> in script.js to also post RSVPs to a service like Formspree.
-              </p>
             </form>
 
             <div class="success" id="rsvpSuccess" hidden>
@@ -388,19 +370,7 @@
                 <button class="btn btn-secondary" type="button" id="exportRsvpsBtn2">Export RSVPs (CSV)</button>
               </div>
             </div>
-          </article>
-
-          <aside class="card">
-            <h3 class="card-title">Quick notes</h3>
-            <ul class="clean-list" id="rsvpNotesList"></ul>
-
-            <div class="divider" role="presentation"></div>
-
-            <p class="muted small">
-              If you need to update an RSVP, submit again with the same name and email. Exported CSV helps you dedupe in a spreadsheet.
-            </p>
-          </aside>
-        </div>
+        </article>
       </div>
     </section>
 

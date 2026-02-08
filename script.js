@@ -112,11 +112,7 @@ const CONFIG = {
     { q: "Who can I contact with questions?", a: "Email us anytime and we’ll get back to you as soon as we can." }
   ],
 
-  rsvpNotes: [
-    "Please RSVP by the deadline so we can finalize seating and meals.",
-    "If you have dietary restrictions, tell us in the form.",
-    "If you need to update your RSVP, submit again and include the same name and email."
-  ],
+  rsvpNotes: [],
 
   contactEmail: "jananriowedding@gmail.com",
   socials: [
@@ -826,9 +822,7 @@ function initRSVP() {
     const guestsRaw = $("#guests").value;
     const guests = Number.parseInt(guestsRaw, 10);
 
-    const dietary = safeText($("#dietary").value);
     const message = safeText($("#message").value);
-    const song = safeText($("#song").value);
 
     const childValue = readChildFieldValue();
 
@@ -944,7 +938,7 @@ function initRSVP() {
       return;
     }
 
-    const headers = ["id","timestampISO","fullName","email","attendance","guests","dietary","message","song","childAttendance"];
+    const headers = ["id","timestampISO","fullName","email","attendance","guests","message","childAttendance"];
     const lines = [headers.join(","), ...rows.map((r) => headers.map((h) => csvEscape(r[h])).join(","))];
 
     const csv = lines.join("\n");
