@@ -1,11 +1,458 @@
-!DOCTYPE html>
+<!-- index.html -->
+<!--
+  Wedding Website (No build tools)
+  What to edit:
+  - All editable content lives in script.js inside the CONFIG object (top of file).
+  - Colors, typography, spacing live in styles.css under :root variables.
+  - HERO image placeholder is set in styles.css: --hero-image (defaults to assets/hero-hk-disney.jpg)
+
+  How to run:
+  - Keep index.html, styles.css, script.js in the same folder.
+  - Open index.html in your browser (or use Cursor Live Server for auto-reload).
+-->
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>Wedding Website</title>
+
+  <!-- Google Fonts (edit in styles.css if you change font families) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
-    <h1>Hello World</h1>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a class="brand" href="#top" id="brandLink">
+        <img src="assets/logo.png" alt="" class="brand-logo" id="brandLogo" width="120" height="40">
+      </a>
+
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="siteNav">
+        <span class="nav-toggle-lines" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+        <span class="nav-toggle-label">Menu</span>
+      </button>
+
+      <nav class="site-nav" id="siteNav" aria-label="Primary navigation">
+        <ul>
+          <li><a href="#details" data-navlink>Details</a></li>
+          <li><a href="#schedule" data-navlink>Schedule</a></li>
+          <li><a href="#registry" data-navlink>Registry</a></li>
+          <li><a href="#rsvp" data-navlink>RSVP</a></li>
+          <li><a href="#faq" data-navlink>FAQ</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="main">
+    <!-- HERO -->
+    <section class="section hero hero--full-bg" id="top" aria-label="Welcome">
+      <div class="hero-bg-video" aria-hidden="true">
+        <video id="heroVideo" class="hero-video" muted playsinline autoplay preload="auto" loop>
+          <source src="" id="heroVideoSource">
+        </video>
+      </div>
+      <div class="hero-content">
+        <div class="container">
+          <div class="hero-copy">
+              <p class="eyebrow" id="heroEyebrow">You’re invited</p>
+              <h1 class="hero-title" id="heroNames">John Anthony &amp; Rioanne</h1>
+              <p class="hero-subtitle" id="heroLine">A warm, intimate celebration with our favorite people.</p>
+
+              <div class="hero-meta">
+                <p class="hero-date">
+                  <span class="badge" id="heroDow">Saturday</span>
+                  <span class="hero-date-text" id="heroDateText">September 19, 2026</span>
+                </p>
+                <p class="hero-location" id="heroVenueLine">At Evergreen House</p>
+              </div>
+
+              <div class="cta-row">
+                <a class="btn btn-primary" href="#rsvp">RSVP</a>
+                <a class="btn btn-ghost" href="#schedule">See schedule</a>
+                <a class="btn btn-ghost" href="#location">View location</a>
+              </div>
+
+              <div class="hero-actions">
+                <div class="countdown" aria-label="Countdown to wedding">
+                  <p class="countdown-label">Countdown</p>
+                  <div class="countdown-grid" id="countdownGrid" aria-live="polite">
+                    <div class="countdown-item">
+                      <div class="countdown-value" id="cdDays">0</div>
+                      <div class="countdown-unit">Days</div>
+                    </div>
+                    <div class="countdown-item">
+                      <div class="countdown-value" id="cdHours">0</div>
+                      <div class="countdown-unit">Hours</div>
+                    </div>
+                    <div class="countdown-item">
+                      <div class="countdown-value" id="cdMinutes">0</div>
+                      <div class="countdown-unit">Minutes</div>
+                    </div>
+                    <div class="countdown-item">
+                      <div class="countdown-value" id="cdSeconds">0</div>
+                      <div class="countdown-unit">Seconds</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="calendar-actions" aria-label="Add to calendar">
+                  <a class="btn btn-small btn-secondary" id="icsDownload" href="#" download="wedding.ics">Download ICS</a>
+                  <a class="btn btn-small btn-secondary" id="googleCalendarLink" href="#" target="_blank" rel="noopener noreferrer">Google Calendar</a>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DETAILS (DATE + LOCATION) -->
+    <section class="section" id="details" data-reveal>
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title">The details</h2>
+          <p class="section-subtitle">Everything you need, in one place.</p>
+        </header>
+
+        <!-- DATE -->
+        <article class="card" id="date" aria-label="Date" style="margin-bottom: var(--space-5);">
+          <div class="card-header">
+            <h3 class="card-title">Date</h3>
+            <span class="pill" id="datePill">Save the date</span>
+          </div>
+
+          <div class="date-display">
+            <p class="date-dow" id="dateDow">Saturday</p>
+            <p class="date-full" id="dateFull">September 19, 2026</p>
+            <p class="date-time" id="dateTimeLine">Ceremony starts at 4:30 PM</p>
+          </div>
+        </article>
+
+        <!-- LOCATIONS -->
+        <div class="grid-2">
+          <!-- CEREMONY LOCATION -->
+          <article class="card" id="location" aria-label="Ceremony Location">
+            <div class="card-header">
+              <h3 class="card-title">Ceremony</h3>
+              <span class="pill pill-accent" id="ceremonyPill">Church</span>
+            </div>
+
+            <p class="location-venue" id="ceremonyVenueName">St. Gregory the Great Cathedral</p>
+            <p class="location-address" id="ceremonyAddress">Legazpi City, Albay, Philippines</p>
+
+            <div class="location-actions">
+              <button class="btn btn-small btn-secondary" id="copyCeremonyAddressBtn" type="button">Copy address</button>
+              <a class="btn btn-small btn-secondary" id="ceremonyDirectionsLink" href="#" target="_blank" rel="noopener noreferrer">Open directions</a>
+              <span class="copy-toast" id="copyCeremonyToast" role="status" aria-live="polite" hidden>Address copied.</span>
+            </div>
+
+            <div class="map-wrap" aria-label="Map">
+              <iframe
+                id="ceremonyMapFrame"
+                title="Map to ceremony venue"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src=""
+              ></iframe>
+            </div>
+          </article>
+
+          <!-- RECEPTION LOCATION -->
+          <article class="card" id="receptionLocation" aria-label="Reception Location">
+            <div class="card-header">
+              <h3 class="card-title">Reception</h3>
+              <span class="pill pill-accent" id="receptionPill">Venue</span>
+            </div>
+
+            <p class="location-venue" id="receptionVenueName">The Marison Hotel</p>
+            <p class="location-address" id="receptionAddress">Corner Imelda Roces Ave, Legazpi City, Albay, Philippines</p>
+
+            <div class="location-actions">
+              <button class="btn btn-small btn-secondary" id="copyReceptionAddressBtn" type="button">Copy address</button>
+              <a class="btn btn-small btn-secondary" id="receptionDirectionsLink" href="#" target="_blank" rel="noopener noreferrer">Open directions</a>
+              <span class="copy-toast" id="copyReceptionToast" role="status" aria-live="polite" hidden>Address copied.</span>
+            </div>
+
+            <div class="map-wrap" aria-label="Map">
+              <iframe
+                id="receptionMapFrame"
+                title="Map to reception venue"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src=""
+              ></iframe>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCHEDULE -->
+    <section class="section" id="schedule" data-reveal>
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title">Important times</h2>
+          <p class="section-subtitle">A simple flow so you can relax and enjoy.</p>
+        </header>
+
+        <ol class="timeline" id="scheduleList" aria-label="Wedding day schedule"></ol>
+
+      </div>
+    </section>
+
+    <!-- DRESS CODE -->
+    <section class="section" id="dresscode" data-reveal>
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title">Dress code</h2>
+          <p class="section-subtitle" id="dressCodeSubtitle">Cocktail attire, garden-friendly.</p>
+        </header>
+
+        <div class="grid-2">
+          <article class="card">
+            <h3 class="card-title">Guidance</h3>
+            <p class="muted" id="dressCodeGuidance"></p>
+
+            <div class="divider" role="presentation"></div>
+
+            <div class="two-col-list">
+              <div>
+                <p class="list-title">Good options</p>
+                <ul class="clean-list" id="dressGoodList"></ul>
+              </div>
+              <div>
+                <p class="list-title">Please avoid</p>
+                <ul class="clean-list" id="dressAvoidList"></ul>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="color-palette-section">
+              <p class="list-title" style="margin-bottom: var(--space-3);">Suggested color palette</p>
+              <div class="color-palette" id="dressColorPalette"></div>
+            </div>
+            
+            <p class="muted small" id="dressNotes" style="margin-top: var(--space-5);"></p>
+          </article>
+        </div>
+
+        <article class="card dresscode-example-card">
+          <div class="dresscode-example-wrap">
+            <img src="assets/dresscode.jpg" alt="Dress code examples" class="dresscode-example-img">
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- OUR STORY (OPTIONAL) -->
+    <section class="section" id="story" data-reveal>
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title">Our story</h2>
+          <p class="section-subtitle">A few moments that brought us here.</p>
+        </header>
+
+        <ol class="storyline" id="storyList" aria-label="Our story timeline"></ol>
+      </div>
+    </section>
+
+    <!-- GALLERY (OPTIONAL) -->
+    <section class="section" id="gallery" data-reveal>
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title">Gallery</h2>
+          <p class="section-subtitle">Placeholders for now. Swap in your own photos later.</p>
+        </header>
+
+        <div class="gallery-grid" id="galleryGrid" aria-label="Photo gallery"></div>
+      </div>
+    </section>
+
+    <!-- REGISTRY -->
+    <section class="section" id="registry" data-reveal>
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title">Registry</h2>
+          <p class="section-subtitle">Your presence is the best gift. If you would like, you can help us build our next chapter.</p>
+        </header>
+
+        <div class="card-grid" id="registryGrid" aria-label="Registry links"></div>
+      </div>
+    </section>
+
+    <!-- RSVP -->
+    <section class="section" id="rsvp" data-reveal>
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title">RSVP</h2>
+          <p class="section-subtitle">Please reply by <span id="rsvpDeadlineText">June 1, 2026</span>.</p>
+        </header>
+
+        <div class="grid-2">
+          <article class="card">
+            <h3 class="card-title">Your response</h3>
+
+            <div class="notice" id="rsvpNotice" role="status" aria-live="polite">
+              RSVPs are stored in your browser (localStorage). You can export them as CSV anytime.
+            </div>
+
+            <form id="rsvpForm" class="form" novalidate>
+              <div class="field">
+                <label for="fullName">Full name <span class="req" aria-hidden="true">*</span></label>
+                <input id="fullName" name="fullName" type="text" autocomplete="name" required />
+                <p class="field-error" id="error-fullName" aria-live="polite"></p>
+              </div>
+
+              <div class="field">
+                <label for="email">Email <span class="req" aria-hidden="true">*</span></label>
+                <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required />
+                <p class="field-error" id="error-email" aria-live="polite"></p>
+              </div>
+
+              <fieldset class="field">
+                <legend>Attendance <span class="req" aria-hidden="true">*</span></legend>
+                <div class="radio-row" role="radiogroup" aria-describedby="error-attendance">
+                  <label class="radio">
+                    <input type="radio" name="attendance" value="yes" required />
+                    <span>Yes, can’t wait</span>
+                  </label>
+                  <label class="radio">
+                    <input type="radio" name="attendance" value="no" required />
+                    <span>No, with love</span>
+                  </label>
+                </div>
+                <p class="field-error" id="error-attendance" aria-live="polite"></p>
+              </fieldset>
+
+              <div class="field" id="guestsGroup">
+                <label for="guests">Number of guests</label>
+                <select id="guests" name="guests">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+                <p class="field-hint" id="guestsHint">Includes you. Max 4.</p>
+                <p class="field-error" id="error-guests" aria-live="polite"></p>
+              </div>
+
+              <div class="field" id="childPolicyField"></div>
+
+              <div class="field">
+                <label for="dietary">Dietary restrictions (optional)</label>
+                <input id="dietary" name="dietary" type="text" autocomplete="off" />
+              </div>
+
+              <div class="field">
+                <label for="message">Message to the couple (optional)</label>
+                <textarea id="message" name="message" rows="3"></textarea>
+              </div>
+
+              <div class="field">
+                <label for="song">Song request (optional)</label>
+                <input id="song" name="song" type="text" autocomplete="off" />
+              </div>
+
+              <div class="form-actions">
+                <button class="btn btn-primary" type="submit" id="submitBtn">Submit RSVP</button>
+                <button class="btn btn-secondary" type="button" id="exportRsvpsBtn">Export RSVPs (CSV)</button>
+              </div>
+
+              <p class="muted small">
+                Optional: Set <code>FORM_ENDPOINT</code> in script.js to also post RSVPs to a service like Formspree.
+              </p>
+            </form>
+
+            <div class="success" id="rsvpSuccess" hidden>
+              <h4 class="success-title">RSVP received</h4>
+              <p class="muted" id="rsvpSuccessText">Thank you. We saved your RSVP.</p>
+              <div class="success-actions">
+                <button class="btn btn-secondary" type="button" id="submitAnotherBtn">Submit another RSVP</button>
+                <button class="btn btn-secondary" type="button" id="exportRsvpsBtn2">Export RSVPs (CSV)</button>
+              </div>
+            </div>
+          </article>
+
+          <aside class="card">
+            <h3 class="card-title">Quick notes</h3>
+            <ul class="clean-list" id="rsvpNotesList"></ul>
+
+            <div class="divider" role="presentation"></div>
+
+            <p class="muted small">
+              If you need to update an RSVP, submit again with the same name and email. Exported CSV helps you dedupe in a spreadsheet.
+            </p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHILDREN POLICY -->
+    <section class="section" id="children" data-reveal>
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title">Children policy</h2>
+          <p class="section-subtitle" id="childrenPolicySubtitle"></p>
+        </header>
+
+        <article class="card">
+          <div class="policy-row">
+            <span class="policy-badge" id="childrenPolicyBadge"></span>
+            <div>
+              <p class="policy-title" id="childrenPolicyTitle"></p>
+              <p class="muted" id="childrenPolicyText"></p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq" data-reveal>
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title">FAQ</h2>
+          <p class="section-subtitle">The practical stuff.</p>
+        </header>
+
+        <div class="accordion" id="faqAccordion"></div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <div class="footer-divider" aria-hidden="true"></div>
+    <footer class="footer" aria-label="Footer">
+      <div class="container footer-inner">
+        <div class="footer-col">
+          <p class="footer-title" id="footerNames"></p>
+          <p class="muted" id="footerLine">We can’t wait to celebrate with you.</p>
+        </div>
+
+        <div class="footer-col">
+          <p class="footer-label">Contact</p>
+          <a class="footer-link" id="contactEmailLink" href="mailto:hello@example.com">hello@example.com</a>
+          <div class="footer-social" id="socialLinks"></div>
+        </div>
+
+        <div class="footer-col footer-disclaimer">
+          <p class="muted small" id="footerDisclaimer"></p>
+          <p class="muted small">© <span id="year"></span> <span id="footerNamesInline"></span></p>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
 </body>
 </html>
