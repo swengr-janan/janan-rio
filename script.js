@@ -1161,7 +1161,8 @@ function initEnvelopeLoader() {
   if (!loader) return;
 
   const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const duration = reduceMotion ? 800 : 3800; // ms until we remove loader
+  const isMobile = window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
+  const duration = reduceMotion ? 800 : (isMobile ? 6200 : 3800); // longer on mobile so it doesn't feel too fast
 
   function cleanup() {
     document.body.classList.remove("envelope-loading-active");
