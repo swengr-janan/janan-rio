@@ -31,9 +31,7 @@
   <script>
     (function(){
       try {
-        var show = window.location.search && window.location.search.toLowerCase().indexOf("envelope=1") !== -1;
-        if (show || localStorage.getItem("wedding-envelope-seen") !== "1")
-          document.body.classList.add("envelope-loading-active");
+        document.body.classList.add("envelope-loading-active");
       } catch (e) {}
     })();
   </script>
