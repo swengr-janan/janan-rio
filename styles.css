@@ -1604,10 +1604,151 @@ html.hero-loaded .hero--full-bg .hero-copy > *:nth-child(6) { transition-delay: 
   }
 }
 
-/* Reduced motion */
+/* ============================================
+   Loading: diamond ring with spinner outside (first visit)
+   → "You're Invited" → soft flash to site
+   ============================================ */
+.book-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-content {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+/* Wrapper: spinner track outside, two rings + heart in center */
+.loader-spinner {
+  position: relative;
+  width: 96px;
+  height: 96px;
+}
+
+/* Spinner: rotating track OUTSIDE the ring */
+.loader-spinner-track {
+  position: absolute;
+  inset: -4px;
+  border: 3px solid color-mix(in srgb, var(--accent) 25%, var(--surface));
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: loader-spin 0.9s linear infinite;
+}
+
+/* Flaticon wedding icon in the center */
+.loader-icon-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-icon {
+  display: block;
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+
+@keyframes loader-spin {
+  to { transform: rotate(360deg); }
+}
+
+.loader-text {
+  font-family: "Great Vibes", cursive;
+  font-size: clamp(1.75rem, 6vw, 2.5rem);
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.loader-names {
+  font-family: var(--font-heading);
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+/* Sparkles: white diamond twinkles across the loader (no white flash) */
+.loader-sparkles {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.sparkle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.sparkle:nth-child(1)  { left: 12%; top: 18%; animation-delay: 0s; }
+.sparkle:nth-child(2)  { left: 88%; top: 22%; animation-delay: 0.2s; }
+.sparkle:nth-child(3)  { left: 50%; top: 12%; animation-delay: 0.4s; }
+.sparkle:nth-child(4)  { left: 22%; top: 75%; animation-delay: 0.1s; }
+.sparkle:nth-child(5)  { left: 78%; top: 70%; animation-delay: 0.5s; }
+.sparkle:nth-child(6)  { left: 8%; top: 50%; animation-delay: 0.3s; }
+.sparkle:nth-child(7)  { left: 92%; top: 48%; animation-delay: 0.6s; }
+.sparkle:nth-child(8)  { left: 35%; top: 35%; animation-delay: 0.15s; }
+.sparkle:nth-child(9)  { left: 65%; top: 38%; animation-delay: 0.35s; }
+.sparkle:nth-child(10) { left: 15%; top: 85%; animation-delay: 0.45s; }
+.sparkle:nth-child(11) { left: 85%; top: 15%; animation-delay: 0.25s; }
+.sparkle:nth-child(12) { left: 55%; top: 65%; animation-delay: 0.55s; }
+.sparkle:nth-child(13) { left: 42%; top: 22%; animation-delay: 0.05s; }
+.sparkle:nth-child(14) { left: 70%; top: 82%; animation-delay: 0.4s; }
+.sparkle:nth-child(15) { left: 28%; top: 55%; animation-delay: 0.5s; }
+.sparkle:nth-child(16) { left: 5%; top: 30%; animation-delay: 0.3s; }
+.sparkle:nth-child(17) { left: 95%; top: 60%; animation-delay: 0.2s; }
+.sparkle:nth-child(18) { left: 60%; top: 8%; animation-delay: 0.6s; }
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50%      { opacity: 1; transform: scale(1.2); }
+}
+
+.book-loader.book-loading {
+  animation: book-loader-out 0.5s 3.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes book-loader-out {
+  to { opacity: 0; visibility: hidden; }
+}
+
+body.envelope-loading-active {
+  overflow: hidden;
+  height: 100vh;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   * { transition: none !important; animation: none !important; }
   [data-reveal] { opacity: 1; transform: none; }
   .hero--full-bg .hero-copy > * { opacity: 1; transform: none; }
+  .book-loader .loader-spinner-track,
+  .book-loader .sparkle { animation: none !important; }
+  .book-loader .sparkle { opacity: 0.6; transform: scale(1); }
+  .book-loader.book-loading { animation: book-loader-out 0.3s 0.5s forwards !important; }
 }

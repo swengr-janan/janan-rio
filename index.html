@@ -22,12 +22,43 @@
   <!-- Google Fonts (edit in styles.css if you change font families) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&family=Great+Vibes&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
+  <script>
+    (function(){
+      try {
+        var show = window.location.search && window.location.search.toLowerCase().indexOf("envelope=1") !== -1;
+        if (show || localStorage.getItem("wedding-envelope-seen") !== "1")
+          document.body.classList.add("envelope-loading-active");
+      } catch (e) {}
+    })();
+  </script>
+  <!-- Loading: wedding-ring.png + spinner → "You're Invited" → fade to site -->
+  <div id="book-loader" class="book-loader" aria-hidden="true" role="presentation">
+    <div class="loader-content">
+      <div class="loader-spinner" aria-hidden="true">
+        <div class="loader-spinner-track"></div>
+        <div class="loader-icon-wrap">
+          <img src="assets/wedding-ring.png" alt="" class="loader-icon" width="64" height="64">
+        </div>
+      </div>
+      <span class="loader-text">You're Invited</span>
+      <span class="loader-names" id="bookSpreadNames">John &amp; Rio</span>
+    </div>
+    <div class="loader-sparkles" aria-hidden="true">
+      <span class="sparkle"></span><span class="sparkle"></span><span class="sparkle"></span>
+      <span class="sparkle"></span><span class="sparkle"></span><span class="sparkle"></span>
+      <span class="sparkle"></span><span class="sparkle"></span><span class="sparkle"></span>
+      <span class="sparkle"></span><span class="sparkle"></span><span class="sparkle"></span>
+      <span class="sparkle"></span><span class="sparkle"></span><span class="sparkle"></span>
+      <span class="sparkle"></span><span class="sparkle"></span><span class="sparkle"></span>
+    </div>
+  </div>
+
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header" id="siteHeader">

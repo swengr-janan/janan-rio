@@ -13,6 +13,7 @@
 const FORM_ENDPOINT = ""; // Example: "https://formspree.io/f/yourId" (leave blank to disable POST)
 
 const THEME_STORAGE_KEY = "wedding-theme"; // "light" | "dark"
+const ENVELOPE_SEEN_KEY = "wedding-envelope-seen"; // set after first visit to skip loader
 
 /** Single source of truth for editable content */
 const CONFIG = {
@@ -207,10 +208,20 @@ function safeSetAttr(selector, attr, value) {
   if (el) el[attr] = value;
 }
 
+/** Short names for book spread / seal, e.g. "John Anthony & Rioanne" → "John & Rio" */
+function shortNamesForSeal(names) {
+  const s = String(names || "").trim();
+  const parts = s.split(/\s+&\s+/).map((p) => p.trim().split(/\s+/)[0]).filter(Boolean);
+  return parts.length >= 2 ? `${parts[0]} & ${parts[1]}` : s || "John & Rio";
+}
+
 function applyConfigToStatic() {
   try {
     const brandLogo = $("#brandLogo");
     if (brandLogo) brandLogo.textContent = initialsPairFromNames(CONFIG.coupleNames);
+
+    const bookSpreadNames = $("#bookSpreadNames");
+    if (bookSpreadNames) bookSpreadNames.textContent = shortNamesForSeal(CONFIG.coupleNames);
 
     safeSetText("#footerNames", CONFIG.coupleNames);
     safeSetText("#footerNamesInline", CONFIG.coupleNames);
@@ -1144,9 +1155,47 @@ function placeholderSvg(monogram, index) {
 }
 
 /* -----------------------------
+   Book loading animation
+   Plays on first visit; skip if ENVELOPE_SEEN_KEY is set in localStorage.
+------------------------------ */
+function initEnvelopeLoader() {
+  const loader = document.getElementById("book-loader");
+  if (!loader) return;
+
+  // Force show: open with ?envelope=1 to always play the animation (and don't save "seen")
+  const forceShow = typeof window !== "undefined" && window.location && window.location.search && window.location.search.toLowerCase().includes("envelope=1");
+  const seen = forceShow ? null : localStorage.getItem(ENVELOPE_SEEN_KEY);
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const duration = reduceMotion ? 800 : 3800; // ms until we remove loader
+
+  function cleanup(skipSave) {
+    document.body.classList.remove("envelope-loading-active");
+    loader.remove();
+    if (!skipSave) try { localStorage.setItem(ENVELOPE_SEEN_KEY, "1"); } catch (_) {}
+  }
+
+  if (seen === "1") {
+    cleanup(true);
+    return;
+  }
+
+  document.body.classList.add("envelope-loading-active");
+  loader.classList.add("book-loading");
+
+  const onEnd = (e) => {
+    if (e.target !== loader || e.animationName !== "book-loader-out") return;
+    loader.removeEventListener("animationend", onEnd);
+    cleanup(forceShow);
+  };
+  loader.addEventListener("animationend", onEnd);
+  setTimeout(() => cleanup(forceShow), duration);
+}
+
+/* -----------------------------
    Initialization
 ------------------------------ */
 function init() {
+  initEnvelopeLoader();
   try {
     applyConfigToStatic();
     renderSchedule();
