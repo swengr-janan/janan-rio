@@ -3,14 +3,49 @@
   Wedding Website Script (No build tools)
   What to edit:
   - Edit only the CONFIG object below to update all content (names, date, venue, schedule, registry, FAQs, etc.).
-  - Optional: set FORM_ENDPOINT to a URL (like Formspree) to also POST RSVPs online.
+  - Set FORM_ENDPOINT to your Google Apps Script Web App URL to send RSVPs to your Google Sheet.
 
-  Notes:
-  - RSVP submissions always store locally in this browser (localStorage). If FORM_ENDPOINT is set, the site also tries to POST there.
-  - Export RSVPs (CSV) downloads what is stored locally.
+  Google Sheet setup (one-time):
+  1. Create a new Google Sheet. Rename the first tab to: RSVPs
+  2. In row 1, add these column headers (left to right):
+       Timestamp | Full Name | Email | Attendance | Message | Children Acknowledged
+  3. From the sheet, open Extensions → Apps Script. Replace the code with:
+
+       function doPost(e) {
+         var lock = LockService.getScriptLock();
+         lock.tryLock(10000);
+         try {
+           var data = JSON.parse(e.postData.contents);
+           var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('RSVPs');
+           if (!sheet) {
+             sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet('RSVPs');
+             sheet.appendRow(['Timestamp','Full Name','Email','Attendance','Message','Children Acknowledged']);
+           }
+           sheet.appendRow([
+             new Date(data.timestampISO || Date.now()),
+             data.fullName || '',
+             data.email || '',
+             data.attendance || '',
+             data.message || '',
+             data.childAttendance || ''
+           ]);
+           return ContentService.createTextOutput(JSON.stringify({ ok: true }))
+             .setMimeType(ContentService.MimeType.JSON);
+         } catch (err) {
+           return ContentService.createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
+             .setMimeType(ContentService.MimeType.JSON);
+         } finally {
+           lock.releaseLock();
+         }
+       }
+
+  4. Click Deploy → New deployment → type: Web app.
+       - Execute as: Me
+       - Who has access: Anyone
+     Copy the resulting Web App URL and paste it into FORM_ENDPOINT below.
 */
 
-const FORM_ENDPOINT = ""; // Example: "https://formspree.io/f/yourId" (leave blank to disable POST)
+const FORM_ENDPOINT = "https://script.google.com/macros/s/AKfycbxQHEpdj4FoB7CK4_rvLvzOIuLLebW2GbW9fTkGJm4EkRvZEZN92HwTBNpOyciMzO6LDg/exec"; // Paste your Google Apps Script Web App URL here
 
 const THEME_STORAGE_KEY = "wedding-theme"; // "light" | "dark"
 /** Single source of truth for editable content */
@@ -22,7 +57,7 @@ const CONFIG = {
   dateISO: "2026-08-10", // YYYY-MM-DD
   startTime: "14:30", // 24h local time (for countdown/calendar)
   endTime: "23:00",   // 24h local time (for calendar)
-  rsvpDeadlineISO: "2026-07-30",
+  rsvpDeadlineISO: "2026-06-01",
 
   ceremonyVenue: {
     name: "St. Gregory the Great Cathedral",
@@ -91,8 +126,27 @@ const CONFIG = {
   ],
 
   gallery: {
-    count: 9,
-    caption: "Placeholder gallery image"
+    caption: "Gallery photo",
+    files: [
+      "assets/gallery/1.jpeg",
+      "assets/gallery/2.jpg",
+      "assets/gallery/3.jpeg",
+      "assets/gallery/4.jpg",
+      "assets/gallery/5.jpg",
+      "assets/gallery/6.JPG",
+      "assets/gallery/7.jpg",
+      "assets/gallery/8.jpg",
+      "assets/gallery/9.jpg",
+      "assets/gallery/10.jpg",
+      "assets/gallery/11.jpg",
+      "assets/gallery/12.jpg",
+      "assets/gallery/13.jpg",
+      "assets/gallery/14.jpg",
+      "assets/gallery/15.jpg",
+      "assets/gallery/16.JPG",
+      "assets/gallery/17.jpg",
+      "assets/gallery/18.PNG"
+    ]
   },
 
   childrenPolicy: {
@@ -126,8 +180,6 @@ const CONFIG = {
 /* -----------------------------
    Helpers
 ------------------------------ */
-const LS_KEY = "wedding_rsvps_v1";
-
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
@@ -170,12 +222,6 @@ function escapeIcsText(text) {
     .replace(/\n/g, "\\n")
     .replace(/,/g, "\\,")
     .replace(/;/g, "\\;");
-}
-
-function csvEscape(value) {
-  const s = String(value ?? "");
-  if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
-  return s;
 }
 
 function uid() {
@@ -428,23 +474,144 @@ function renderStory() {
 }
 
 function renderGallery() {
-  const grid = $("#galleryGrid");
-  grid.innerHTML = "";
+  const root = $("#galleryGrid");
+  if (!root) return;
+  root.innerHTML = "";
 
-  for (let i = 1; i <= CONFIG.gallery.count; i++) {
-    const fig = document.createElement("figure");
-    fig.className = "gallery-item";
+  const files = Array.isArray(CONFIG.gallery.files) ? CONFIG.gallery.files : [];
+  const photos = files.filter(Boolean).map((src) => safeText(src));
 
-    const svg = placeholderSvg(monogramFromNames(CONFIG.coupleNames), i);
-    const src = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
-
-    const img = document.createElement("img");
-    img.src = src;
-    img.alt = `${CONFIG.gallery.caption} ${i}`;
-
-    fig.appendChild(img);
-    grid.appendChild(fig);
+  if (!photos.length) {
+    const fallbackCount = Number(CONFIG.gallery.count) || 0;
+    for (let i = 1; i <= fallbackCount; i++) {
+      const svg = placeholderSvg(monogramFromNames(CONFIG.coupleNames), i);
+      photos.push(`data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`);
+    }
   }
+  if (!photos.length) return;
+
+  const totalSpreads = Math.ceil(photos.length / 2);
+  let currentSpread = 0;
+  let isFlipping = false;
+
+  const monogram = monogramFromNames(CONFIG.coupleNames);
+  const monogramHtml = `
+    <svg class="page-monogram" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" aria-hidden="true">
+      <text x="60" y="40" text-anchor="middle" font-size="28" font-family="Playfair Display, Georgia, serif" letter-spacing="3" fill="currentColor">${escapeHtml(monogram)}</text>
+    </svg>`;
+
+  function pageFace(src, num) {
+    if (!src) return monogramHtml;
+    return `<img src="${escapeAttr(src)}" alt="${escapeAttr(`${CONFIG.gallery.caption} ${num}`)}" />`;
+  }
+
+  root.innerHTML = `
+    <div class="book-binding" aria-hidden="true"></div>
+    <div class="book-pages">
+      <div class="book-page book-page-left"></div>
+      <div class="book-page book-page-right"></div>
+    </div>
+    <button class="book-nav book-prev" type="button" aria-label="Previous spread">&#8249;</button>
+    <button class="book-nav book-next" type="button" aria-label="Next spread">&#8250;</button>
+    <p class="book-pageindicator" aria-live="polite"></p>
+  `;
+
+  const leftPage = root.querySelector(".book-page-left");
+  const rightPage = root.querySelector(".book-page-right");
+  const prevBtn = root.querySelector(".book-prev");
+  const nextBtn = root.querySelector(".book-next");
+  const indicator = root.querySelector(".book-pageindicator");
+
+  function setPage(pageEl, idx) {
+    const num = idx + 1;
+    pageEl.innerHTML = pageFace(photos[idx], num);
+    pageEl.dataset.page = photos[idx] ? String(num) : "";
+  }
+
+  function updateIndicator(i) {
+    const start = i * 2 + 1;
+    const end = Math.min((i + 1) * 2, photos.length);
+    indicator.textContent = start === end
+      ? `Page ${start} of ${photos.length}`
+      : `Pages ${start}–${end} of ${photos.length}`;
+    prevBtn.disabled = i === 0;
+    nextBtn.disabled = i >= totalSpreads - 1;
+  }
+
+  function showSpread(i) {
+    setPage(leftPage, i * 2);
+    setPage(rightPage, i * 2 + 1);
+    updateIndicator(i);
+  }
+
+  function flip(direction) {
+    if (isFlipping) return;
+    const next = currentSpread + direction;
+    if (next < 0 || next >= totalSpreads) return;
+
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      currentSpread = next;
+      showSpread(next);
+      return;
+    }
+
+    isFlipping = true;
+    const from = currentSpread;
+    const to = next;
+
+    let frontIdx, backIdx;
+    if (direction > 0) {
+      frontIdx = from * 2 + 1;   // current right
+      backIdx = to * 2;          // next left
+    } else {
+      frontIdx = from * 2;       // current left
+      backIdx = to * 2 + 1;      // prev right
+    }
+
+    const flipper = document.createElement("div");
+    flipper.className = "book-flipper " + (direction > 0 ? "flip-from-right" : "flip-from-left");
+    flipper.innerHTML = `
+      <div class="book-flipper-face front">${pageFace(photos[frontIdx], frontIdx + 1)}</div>
+      <div class="book-flipper-face back">${pageFace(photos[backIdx], backIdx + 1)}</div>
+    `;
+
+    if (direction > 0) {
+      setPage(rightPage, to * 2 + 1);
+    } else {
+      setPage(leftPage, to * 2);
+    }
+
+    root.appendChild(flipper);
+
+    const finish = () => {
+      if (direction > 0) {
+        setPage(leftPage, to * 2);
+      } else {
+        setPage(rightPage, to * 2 + 1);
+      }
+      flipper.remove();
+      currentSpread = to;
+      updateIndicator(to);
+      isFlipping = false;
+    };
+
+    flipper.addEventListener("animationend", finish, { once: true });
+    setTimeout(() => { if (isFlipping) finish(); }, 1400);
+  }
+
+  prevBtn.addEventListener("click", () => flip(-1));
+  nextBtn.addEventListener("click", () => flip(1));
+
+  document.addEventListener("keydown", (e) => {
+    if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+    const rect = root.getBoundingClientRect();
+    if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+    if (e.key === "ArrowRight") flip(1);
+    else if (e.key === "ArrowLeft") flip(-1);
+  });
+
+  showSpread(0);
 }
 
 /* -----------------------------
@@ -802,26 +969,13 @@ function initRSVP() {
   const form = $("#rsvpForm");
   const success = $("#rsvpSuccess");
   const successText = $("#rsvpSuccessText");
-
-  const exportBtn1 = $("#exportRsvpsBtn");
-  const exportBtn2 = $("#exportRsvpsBtn2");
+  const submitBtn = $("#submitBtn");
   const submitAnotherBtn = $("#submitAnotherBtn");
-
-  const guestsGroup = $("#guestsGroup");
 
   function getAttendanceValue() {
     const checked = $('input[name="attendance"]:checked');
     return checked ? checked.value : "";
   }
-
-  function setGuestsVisibility() {
-    const attendance = getAttendanceValue();
-    const show = attendance !== "no";
-    guestsGroup.style.display = show ? "" : "none";
-  }
-
-  $$('input[name="attendance"]').forEach((r) => r.addEventListener("change", setGuestsVisibility));
-  setGuestsVisibility();
 
   renderChildPolicyField();
 
@@ -830,14 +984,11 @@ function initRSVP() {
     success.hidden = true;
     form.reset();
     clearErrors();
-    setGuestsVisibility();
     renderChildPolicyField();
     $("#fullName").focus();
   }
 
   submitAnotherBtn.addEventListener("click", showForm);
-  exportBtn2.addEventListener("click", exportRsvps);
-  exportBtn1.addEventListener("click", exportRsvps);
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -846,20 +997,20 @@ function initRSVP() {
     const payload = collectAndValidate();
     if (!payload) return;
 
-    const storedOk = storeRsvp(payload);
+    submitBtn.disabled = true;
+    const original = submitBtn.textContent;
+    submitBtn.textContent = "Sending…";
 
-    let postedOk = false;
-    if (safeText(FORM_ENDPOINT)) {
-      postedOk = await postRsvp(payload);
-    }
+    const postedOk = await postRsvp(payload);
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = original;
 
     form.hidden = true;
     success.hidden = false;
-
-    const statusBits = [];
-    statusBits.push(storedOk ? "Saved locally." : "Local save failed.");
-    if (safeText(FORM_ENDPOINT)) statusBits.push(postedOk ? "Sent online." : "Online submit failed.");
-    successText.textContent = `Thank you. ${statusBits.join(" ")}`;
+    successText.textContent = postedOk
+      ? "Thank you. Your RSVP has been recorded."
+      : "Thank you. We could not reach our server — please email us if your RSVP doesn't arrive.";
     $("#submitAnotherBtn").focus();
   });
 
@@ -867,12 +1018,7 @@ function initRSVP() {
     const fullName = safeText($("#fullName").value);
     const email = safeText($("#email").value);
     const attendance = getAttendanceValue();
-
-    const guestsRaw = $("#guests").value;
-    const guests = Number.parseInt(guestsRaw, 10);
-
     const message = safeText($("#message").value);
-
     const childValue = readChildFieldValue();
 
     let ok = true;
@@ -880,13 +1026,6 @@ function initRSVP() {
     if (fullName.length < 2) { setError("fullName", "Please enter your full name."); ok = false; }
     if (!isValidEmail(email)) { setError("email", "Please enter a valid email address."); ok = false; }
     if (!attendance) { setError("attendance", "Please select Yes or No."); ok = false; }
-
-    if (attendance !== "no") {
-      if (!Number.isFinite(guests) || guests < 1 || guests > 4) {
-        setError("guests", "Guests must be between 1 and 4.");
-        ok = false;
-      }
-    }
 
     if (!CONFIG.childrenPolicy.allowed && attendance !== "no") {
       const ack = $("#childAck");
@@ -904,10 +1043,7 @@ function initRSVP() {
       fullName,
       email,
       attendance,
-      guests: attendance === "no" ? 0 : guests,
-      dietary,
       message,
-      song,
       childAttendance: childValue
     };
   }
@@ -951,57 +1087,16 @@ function initRSVP() {
   }
 
   function postRsvp(payload) {
+    if (!safeText(FORM_ENDPOINT)) {
+      console.warn("FORM_ENDPOINT is not set — RSVP was not sent. See setup instructions at the top of script.js.");
+      return Promise.resolve(false);
+    }
     return fetch(FORM_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(payload)
-    }).then((res) => res.ok).catch(() => false);
-  }
-
-  function storeRsvp(payload) {
-    try {
-      const all = loadRsvps();
-      all.push(payload);
-      localStorage.setItem(LS_KEY, JSON.stringify(all));
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  function loadRsvps() {
-    try {
-      const raw = localStorage.getItem(LS_KEY);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function exportRsvps() {
-    const rows = loadRsvps();
-    if (!rows.length) {
-      alert("No RSVPs stored in this browser yet.");
-      return;
-    }
-
-    const headers = ["id","timestampISO","fullName","email","attendance","guests","message","childAttendance"];
-    const lines = [headers.join(","), ...rows.map((r) => headers.map((h) => csvEscape(r[h])).join(","))];
-
-    const csv = lines.join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "rsvps.csv";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }).then(() => true).catch(() => false);
   }
 
   function setError(field, msg) {
@@ -1022,7 +1117,7 @@ function initRSVP() {
   }
 
   function clearErrors() {
-    ["fullName", "email", "guests"].forEach((id) => {
+    ["fullName", "email"].forEach((id) => {
       const input = $("#" + id);
       const p = $("#error-" + id);
       if (input) input.removeAttribute("aria-invalid");
@@ -1161,8 +1256,7 @@ function initEnvelopeLoader() {
   if (!loader) return;
 
   const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const isMobile = window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
-  const duration = reduceMotion ? 800 : (isMobile ? 6200 : 3800); // longer on mobile so it doesn't feel too fast
+  const duration = reduceMotion ? 800 : 3800; // ms until we remove loader
 
   function cleanup() {
     document.body.classList.remove("envelope-loading-active");

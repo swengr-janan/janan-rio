@@ -310,7 +310,7 @@
           <p class="section-subtitle">Placeholders for now. Swap in your own photos later.</p>
         </header>
 
-        <div class="gallery-grid" id="galleryGrid" aria-label="Photo gallery"></div>
+        <div class="gallery-book" id="galleryGrid" aria-label="Photo gallery"></div>
       </div>
     </section>
 
@@ -331,7 +331,7 @@
       <div class="container">
         <header class="section-header">
           <h2 class="section-title">RSVP</h2>
-          <p class="section-subtitle">Please reply by <span id="rsvpDeadlineText">June 1, 2026</span>.</p>
+          <p class="section-subtitle">Please reply by <span id="rsvpDeadlineText">August 1, 2026</span>.</p>
         </header>
 
         <article class="card">
@@ -366,18 +366,6 @@
                 <p class="field-error" id="error-attendance" aria-live="polite"></p>
               </fieldset>
 
-              <div class="field" id="guestsGroup">
-                <label for="guests">Number of guests</label>
-                <select id="guests" name="guests">
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                </select>
-                <p class="field-hint" id="guestsHint">Includes you. Max 4.</p>
-                <p class="field-error" id="error-guests" aria-live="polite"></p>
-              </div>
-
               <div class="field" id="childPolicyField"></div>
 
               <div class="field">
@@ -387,7 +375,6 @@
 
               <div class="form-actions">
                 <button class="btn btn-primary" type="submit" id="submitBtn">Submit RSVP</button>
-                <button class="btn btn-secondary" type="button" id="exportRsvpsBtn">Export RSVPs (CSV)</button>
               </div>
             </form>
 
@@ -396,7 +383,6 @@
               <p class="muted" id="rsvpSuccessText">Thank you. We saved your RSVP.</p>
               <div class="success-actions">
                 <button class="btn btn-secondary" type="button" id="submitAnotherBtn">Submit another RSVP</button>
-                <button class="btn btn-secondary" type="button" id="exportRsvpsBtn2">Export RSVPs (CSV)</button>
               </div>
             </div>
         </article>
