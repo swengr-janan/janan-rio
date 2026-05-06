@@ -79,7 +79,7 @@ const CONFIG = {
     { time: "3:00 PM", title: "Ceremony", details: "Unplugged ceremony. Please keep phones away.", location: "ceremony" },
     { time: "5:00 PM", title: "Cocktail hour", details: "Light bites, photos, and good conversation at The Marison Hotel.", location: "reception" },
     { time: "6:30 PM", title: "Reception", details: "Dinner, toasts, and dancing at The Marison Hotel.", location: "reception" },
-    { time: "10:45 PM", title: "Last dance", details: "One more song together before goodbye.", location: "reception" }
+    { time: "8:30 PM", title: "Last dance", details: "One more song together before goodbye.", location: "reception" }
   ],
 
   dressCode: {
@@ -161,8 +161,8 @@ const CONFIG = {
     { q: "Is there parking?", a: "Yes. On-site parking is available. If you can, carpool or use a ride share for the easiest exit." },
     { q: "Can I bring a plus-one?", a: "If your invitation includes a guest, you’re covered. If you’re unsure, reach out and we’ll confirm." },
     { q: "What about gifts?", a: "Your presence is the best gift. If you’d like, our registry links are above." },
-    { q: "What if the weather changes?", a: "The plan works in most weather. We’ll communicate any updates by email the day before." },
-    { q: "Who can I contact with questions?", a: "Email us anytime and we’ll get back to you as soon as we can." }
+    { q: "What if the weather changes?", a: "The plan works in most weather. We’ll communicate any updates via message the day before." },
+    { q: "Who can I contact with questions?", a: "Message us anytime and we’ll get back to you as soon as we can." }
   ],
 
   rsvpNotes: [],
