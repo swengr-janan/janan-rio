@@ -55,7 +55,7 @@ const CONFIG = {
   /** Hero background: single video (loops). */
   heroVideoUrls: ["assets/vid-1.mp4"],
   dateISO: "2026-08-10", // YYYY-MM-DD
-  startTime: "14:30", // 24h local time (for countdown/calendar)
+  startTime: "15:00", // 24h local time (for countdown/calendar)
   endTime: "23:00",   // 24h local time (for calendar)
   rsvpDeadlineISO: "2026-06-01",
 
